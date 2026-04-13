@@ -20,3 +20,12 @@ class Weather(Base):
 
     def __repr__(self) -> str:
         return f"Weather(id={self.id!r}, city={self.city!r}, temp={self.temperature!r})"
+
+class City(Base):
+    __tablename__ = "city"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    def __repr__(self) -> str:
+        return f"City(id={self.id!r}, name={self.name!r})"
