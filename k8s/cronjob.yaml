@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: weather-worker
+  namespace: weather-app
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: weather-worker
+              image: weather-app:latest
+              imagePullPolicy: Never
+              command: ["python", "worker.py"]
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: weather-secrets
+                      key: DATABASE_URL
+                - name: WEATHER_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: weather-secrets
+                      key: WEATHER_API_KEY
+          restartPolicy: OnFailure
