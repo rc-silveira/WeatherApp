@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -27,16 +28,19 @@ def get_all_cities(db: Session = Depends(get_db)):
 def add_city(name: str, db: Session = Depends(get_db)):
     city = City(name=name)
     db.add(city)
-    db.commit()
-    db.refresh(city)
-    return city
-
+    try:
+        db.commit()
+        db.refresh(city)
+        return city
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="City already exists")
 
 @app.delete("/cities/{city_name}")
 def delete_city(city_name: str, db: Session = Depends(get_db)):
     city = db.query(City).filter(City.name.ilike(city_name)).first()
     if not city:
-        return {"message": "City not found"}, 404
+        raise HTTPException(status_code=404, detail="City not found")
     db.delete(city)
     db.commit()
     return {"status": "deleted", "city": city_name}
