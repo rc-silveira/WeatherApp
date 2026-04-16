@@ -36,13 +36,21 @@ def fetch_weather(city):
         "humidity": data["main"]["humidity"]
     }
 
-    new_record = Weather(**weather_info)
-
     db = SessionLocal()
+
+    existing = db.query(Weather).filter(
+        Weather.city == weather_info["city"],
+        Weather.forecast_datetime == weather_info["forecast_datetime"]
+    ).first()
+
+    if existing:
+        db.close()
+        return weather_info
+
+    new_record = Weather(**weather_info)
     db.add(new_record)
     db.commit()
     db.refresh(new_record)
     db.close()
 
     return weather_info
-

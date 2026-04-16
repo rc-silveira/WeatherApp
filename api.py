@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -7,6 +8,12 @@ from models import Weather, City
 
 app = FastAPI(title="Weather API")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/weather/{city_name}")
 def get_weather_by_city(city_name: str, db: Session = Depends(get_db)):
@@ -35,6 +42,7 @@ def add_city(name: str, db: Session = Depends(get_db)):
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=400, detail="City already exists")
+
 
 @app.delete("/cities/{city_name}")
 def delete_city(city_name: str, db: Session = Depends(get_db)):
