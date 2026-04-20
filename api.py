@@ -1,3 +1,4 @@
+import ollama
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
@@ -14,6 +15,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.get("/weather/{city_name}")
 def get_weather_by_city(city_name: str, db: Session = Depends(get_db)):
@@ -52,3 +54,18 @@ def delete_city(city_name: str, db: Session = Depends(get_db)):
     db.delete(city)
     db.commit()
     return {"status": "deleted", "city": city_name}
+
+
+@app.post("/ai/ask")
+def ask_ai(question: str, db: Session = Depends(get_db)):
+    data = db.query(Weather).order_by(Weather.forecast_datetime.desc()).limit(20).all()
+    lines = []
+    for item in data:
+        lines.append(f"{item.city}: {item.temperature}ºC, {item.description}, {item.forecast_datetime}")
+    context = "\n".join(lines)
+    response = ollama.chat(
+        model="llama3.2",
+        messages=[
+            {"role": "system", "content": "Answer concisely and directly, maximum 2 sentences."},
+            {"role": "user", "content": f"{context}\n\nQuestion: {question}"}])
+    return {"answer": response['message']['content']}

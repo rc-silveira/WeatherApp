@@ -7,6 +7,8 @@ function App() {
   const [cities, setCities] = useState([])
   const [weather, setWeather] = useState([])
   const [newCity, setNewCity] = useState("")
+  const [question, setQuestion] = useState("")
+  const [answer, setAnswer] = useState([])
 
   useEffect(() => {
     fetchCities()
@@ -35,6 +37,10 @@ function App() {
     fetchCities()
   }
 
+  async function askAi() {
+    const res = await axios.post(`${API}/ai/ask?question=${question}`)
+    setAnswer([...answer, { question: question, answer: res.data.answer }])  }
+
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: 24 }}>
       <h1>WeatherApp</h1>
@@ -48,7 +54,6 @@ function App() {
         />
         <button onClick={addCity}>Add</button>
       </div>
-
       <ul>
         {cities.map(city => (
           <li key={city.id}>
@@ -59,7 +64,29 @@ function App() {
           </li>
         ))}
       </ul>
+        <div style={{ marginBottom: 16 }}>
+      <h2>Ask me anything</h2>
 
+      <div style={{ marginBottom: 16 }}>
+        {answer.map((item, index) => (
+          <div key={index} style={{ marginBottom: 12 }}>
+            <p><strong>You:</strong> {item.question}</p>
+            <p><strong>AI:</strong> {item.answer}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", gap: 8 }}>
+        <input
+          value={question}
+          onChange={e => setQuestion(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && askAi()}
+          placeholder="Ask me anything..."
+          style={{ flex: 1 }}
+        />
+        <button onClick={askAi}>Ask</button>
+      </div>
+    </div>
       <table border="1" cellPadding="8" style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
