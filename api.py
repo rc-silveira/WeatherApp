@@ -66,4 +66,4 @@ def delete_city(city_name: str, db: Session = Depends(get_db)):
 def ask_ai(question: str, db: Session = Depends(get_db)):
     if not model:
         raise HTTPException(status_code=500, detail="AI_MODEL environment variable not set")
-    return analyze_weather_with_ai(question, adapter, model, db)
+    return {"answer": analyze_weather_with_ai(question, adapter, model, db)}
