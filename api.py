@@ -1,13 +1,19 @@
-import ollama
+import os
+
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from database import get_db
+from llm_factory import create_llm_client
 from models import Weather, City
+from services import analyze_weather_with_ai
 
 app = FastAPI(title="Weather API")
+
+adapter = create_llm_client()
+model = os.environ.get("AI_MODEL")
 
 app.add_middleware(
     CORSMiddleware,
@@ -58,14 +64,6 @@ def delete_city(city_name: str, db: Session = Depends(get_db)):
 
 @app.post("/ai/ask")
 def ask_ai(question: str, db: Session = Depends(get_db)):
-    data = db.query(Weather).order_by(Weather.forecast_datetime.desc()).limit(20).all()
-    lines = []
-    for item in data:
-        lines.append(f"{item.city}: {item.temperature}ºC, {item.description}, {item.forecast_datetime}")
-    context = "\n".join(lines)
-    response = ollama.chat(
-        model="llama3.2",
-        messages=[
-            {"role": "system", "content": "Answer concisely and directly, maximum 2 sentences."},
-            {"role": "user", "content": f"{context}\n\nQuestion: {question}"}])
-    return {"answer": response['message']['content']}
+    if not model:
+        raise HTTPException(status_code=500, detail="AI_MODEL environment variable not set")
+    return analyze_weather_with_ai(question, adapter, model, db)

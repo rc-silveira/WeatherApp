@@ -2,8 +2,11 @@ from datetime import datetime
 import os
 import requests
 from dotenv import load_dotenv
+from fastapi import Depends
+from sqlalchemy.orm import Session
 
-from database import SessionLocal
+from database import SessionLocal, get_db
+from llm_integration import LlmIntegration
 from models import Weather
 
 load_dotenv()
@@ -54,3 +57,16 @@ def fetch_weather(city):
     db.close()
 
     return weather_info
+
+
+def analyze_weather_with_ai(question: str, llm_client: LlmIntegration, ai_model: str, db: Session = Depends(get_db)):
+    data = db.query(Weather).order_by(Weather.forecast_datetime.desc()).limit(20).all()
+    lines = []
+    for item in data:
+        lines.append(f"{item.city}: {item.temperature}ºC, {item.description}, {item.forecast_datetime}")
+    context = "\n".join(lines)
+    message = [
+        {"role": "system", "content": "Answer concisely and directly, maximum 2 sentences."},
+        {"role": "user", "content": f"{context}\n\nQuestion: {question}"}
+    ]
+    return llm_client.client_communication(message, ai_model)
