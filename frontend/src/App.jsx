@@ -59,7 +59,7 @@ function App() {
           <li key={city.id}>
             {city.name}
             <button onClick={() => deleteCity(city.name)} style={{ marginLeft: 8 }}>
-              Remover
+              Remove
             </button>
           </li>
         ))}

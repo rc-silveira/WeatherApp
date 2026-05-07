@@ -1,6 +1,5 @@
 from llm_integration import LlmIntegration
 
-
 class GroqAdapter(LlmIntegration):
     def __init__(self, client):
         self.client = client

@@ -2,16 +2,16 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: weather-worker
-  namespace: weather-app
+  namespace: weather-ai-tracking
 spec:
-  schedule: "*/5 * * * *"
+  schedule: "0 8,12,20 * * *"
   jobTemplate:
     spec:
       template:
         spec:
           containers:
             - name: weather-worker
-              image: weather-app:latest
+              image: weather-ai-tracking:latest
               imagePullPolicy: Never
               command: ["python", "worker.py"]
               env:

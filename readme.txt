@@ -1,1 +1,0 @@
-I want to create a cronjob to call fetch_weather("city") everyday during the morning!
