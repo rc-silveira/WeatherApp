@@ -20,7 +20,7 @@ def fetch_weather(city):
         "q": city,
         "appid": api_key,
         "units": "metric",
-        "lang": "pt"
+        "lang": "en"
     }
 
     response = requests.get(url, params=params)
@@ -66,7 +66,7 @@ def analyze_weather_with_ai(question: str, llm_client: LlmIntegration, ai_model:
         lines.append(f"{item.city}: {item.temperature}ºC, {item.description}, {item.forecast_datetime}")
     context = "\n".join(lines)
     message = [
-        {"role": "system", "content": "Answer concisely and directly, maximum 2 sentences."},
+        {"role": "system", "content": f"Today is {datetime.now().strftime('%Y-%m-%d')}. Answer concisely and directly, maximum 2 sentences."},
         {"role": "user", "content": f"{context}\n\nQuestion: {question}"}
     ]
     return llm_client.client_communication(message, ai_model)

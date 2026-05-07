@@ -6,3 +6,4 @@ __pycache__/
 test.db
 frontend/.vite/
 frontend/node_modules/
+k8s/weather-secret.yaml
