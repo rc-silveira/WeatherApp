@@ -1,12 +1,8 @@
 # weather-ai-tracking
 
-A personal project to track weather data for Portuguese cities and ask an AI about it. Built to explore FastAPI, React, PostgreSQL, and Kubernetes — and to actually understand how these pieces fit together in a real stack.
+A personal project to track weather data and ask an AI about it. Built to get hands-on with FastAPI, React, PostgreSQL, and Kubernetes. Not just each piece in isolation, but the whole stack working together.
 
----
-
-## What it does
-
-You add cities, a background worker fetches weather data from OpenWeatherMap on a schedule, and everything gets stored in a database. There's also a small AI chat where you can ask things like "what's the average temperature in Lisbon this week?" and get a straight answer based on the stored data.
+You add cities, a background worker fetches weather from OpenWeatherMap on a schedule, and everything lands in a database. There's also a small AI chat where you can ask things like "what's the average temperature in Lisbon this week?" and get an actual answer based on the stored data.
 
 ---
 
@@ -15,7 +11,8 @@ You add cities, a background worker fetches weather data from OpenWeatherMap on 
 - **Backend** — FastAPI + Python
 - **Frontend** — React + Vite
 - **Database** — PostgreSQL + SQLAlchemy
-- **AI** — Groq or Ollama (switchable via env var)
+- **AI** — Groq (preferred) or Ollama
+
 - **Weather data** — OpenWeatherMap API
 - **Infra** — Docker, Kubernetes (Minikube locally, EKS for cloud)
 
@@ -23,35 +20,7 @@ You add cities, a background worker fetches weather data from OpenWeatherMap on 
 
 ## Project structure
 
-```
-weather-ai-tracking/
-├── api.py                  # API endpoints
-├── services.py             # Weather fetching and AI logic
-├── models.py               # Database models
-├── database.py             # DB connection
-├── worker.py               # Fetches weather for all tracked cities
-├── llm_integration.py      # Abstract base for LLM providers
-├── llm_factory.py          # Picks the right LLM client based on config
-├── create_tables.py        # Run once to set up the DB
-├── Dockerfile
-├── docker-compose.yml
-├── adapters/
-│   ├── groq_adapter.py
-│   └── ollama_adapter.py
-├── frontend/
-├── k8s/
-│   ├── namespace.yaml
-│   ├── api-deployment.yaml
-│   ├── postgres-deployment.yaml
-│   ├── postgres-pvc.yaml
-│   ├── weather-secret.yaml
-│   └── cronjob.yaml
-├── scripts/
-│   └── deploy.sh
-└── tests/
-    ├── test_api.py
-    └── test_services.py
-```
+The core is all in the root — `api.py`, `services.py`, `models.py`, `worker.py`. The `adapters/` folder has the clients for Groq and Ollama, and `llm_factory.py` picks which one to use based on the env. The rest is what it looks like: `frontend/`, `k8s/`, `scripts/`, `tests/`.
 
 ---
 
@@ -60,9 +29,9 @@ weather-ai-tracking/
 ### 1. Create a `.env` file
 
 ```env
-WEATHER_API_KEY=your_openweathermap_key
+WEATHER_API_KEY=openweathermap_key
 AI_PROVIDER=groq
-GROQ_API_KEY=your_groq_key
+GROQ_API_KEY=groq_key
 AI_MODEL=llama3-8b-8192
 DATABASE_URL=postgresql://admin:admin@localhost:5432/postgres
 ```
@@ -99,7 +68,7 @@ docker compose run --rm worker
 
 ## Running on Kubernetes (Minikube)
 
-This is where the CronJob actually runs — fetching weather 3 times a day automatically.
+This is where the CronJob runs — fetching weather 3 times a day automatically.
 
 ### First time
 
@@ -125,7 +94,7 @@ minikube tunnel
 ./scripts/deploy.sh
 ```
 
-This rebuilds the image inside Minikube and restarts the deployment.
+Rebuilds the image inside Minikube and restarts the deployment.
 
 ### Auto-deploy on commit
 
@@ -153,12 +122,12 @@ Swagger docs at http://localhost:8000/docs.
 
 ## AI providers
 
-Switch between providers with the `AI_PROVIDER` env var.
+Groq is faster and more reliable in practice. Ollama is there if you want to run everything locally.
 
-**Groq** (needs an API key, fast)
+**Groq**
 ```env
 AI_PROVIDER=groq
-GROQ_API_KEY=your_key
+GROQ_API_KEY=key
 AI_MODEL=llama3-8b-8192
 ```
 
@@ -172,7 +141,7 @@ AI_MODEL=llama3
 
 ## CronJob
 
-Runs 3 times a day at 8h, 12h and 20h UTC (9h, 13h, 21h in Portugal during summer):
+Runs 3 times a day at 8h, 12h and 20h UTC — 9h, 13h, 21h in Portugal during summer.
 
 ```
 0 8,12,20 * * *
@@ -182,11 +151,6 @@ Runs 3 times a day at 8h, 12h and 20h UTC (9h, 13h, 21h in Portugal during summe
 
 ## Checking the database
 
-### Via psql
-
-```bash
-kubectl exec -it -n weather-app deployment/postgres -- psql -U admin -d postgres
-```
 
 ### Via DBeaver
 
@@ -205,3 +169,4 @@ Then connect with `localhost:5432`, user `admin`, password `admin`.
 ```bash
 pytest tests/
 ```
+
