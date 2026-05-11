@@ -12,6 +12,7 @@ You add cities, a background worker fetches weather from OpenWeatherMap on a sch
 - **Frontend** — React + Vite
 - **Database** — PostgreSQL + SQLAlchemy
 - **AI** — Groq (preferred) or Ollama
+
 - **Weather data** — OpenWeatherMap API
 - **Infra** — Docker, Kubernetes (Minikube locally, EKS for cloud)
 
@@ -130,7 +131,7 @@ GROQ_API_KEY=key
 AI_MODEL=llama3-8b-8192
 ```
 
-**Ollama**
+**Ollama** (runs locally, no key needed)
 ```env
 AI_PROVIDER=ollama
 AI_MODEL=llama3
@@ -150,6 +151,7 @@ Runs 3 times a day at 8h, 12h and 20h UTC — 9h, 13h, 21h in Portugal during su
 
 ## Checking the database
 
+
 ### Via DBeaver
 
 Forward the port first:
@@ -167,3 +169,4 @@ Then connect with `localhost:5432`, user `admin`, password `admin`.
 ```bash
 pytest tests/
 ```
+
