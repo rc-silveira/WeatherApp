@@ -30,15 +30,9 @@ spec:
                   name: weather-secrets
                   key: GROQ_API_KEY
             - name: AI_PROVIDER
-              valueFrom:
-                secretKeyRef:
-                  name: weather-secrets
-                  key: AI_PROVIDER
+              key: "groq"
             - name: AI_MODEL
-              valueFrom:
-                secretKeyRef:
-                  name: weather-secrets
-                  key: AI_MODEL
+              key: "llama-3.3-70b-versatile"
           ports:
             - containerPort: 8000
 ---
