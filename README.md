@@ -130,7 +130,7 @@ GROQ_API_KEY=key
 AI_MODEL=llama3-8b-8192
 ```
 
-**Ollama**
+**Ollama** (runs locally, no key needed)
 ```env
 AI_PROVIDER=ollama
 AI_MODEL=llama3
@@ -167,3 +167,4 @@ Then connect with `localhost:5432`, user `admin`, password `admin`.
 ```bash
 pytest tests/
 ```
+
